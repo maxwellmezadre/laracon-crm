@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run PHPStan
+./vendor/bin/phpstan analyse
+
+if [ $? -ne 0 ]; then
+    echo "PHPStan failed"
+    exit 1
+fi;
+
+# Run Pint
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep ".php\{0,1\}$") || true
+
+for FILE in $STAGED_FILES
+do
+    ./vendor/bin/pint "$FILE" > /dev/null >&1
+done
